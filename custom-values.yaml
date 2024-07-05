@@ -1,0 +1,66 @@
+# An example of installing Artifactory and Xray only (disabling the rest)
+# Not a production configuration !! The purpose is to highlight the usage of the main configuration blocks related 
+# to use a S3 bucket as filestore, and the external database configuration
+
+### Uninstall
+# helm uninstall jfp
+# kubectl get pvc ...
+# kubectl delete pvc ...
+global:
+  # Generate a random join key with 'openssl rand -hex 32'
+  joinKey: 9a2ab2c7878dd7cac64d885adcea4a25d0da1987ebf2243b56d2ca68b6b077ce
+  # Generate a random master key with 'openssl rand -hex 32'
+  masterKey: 2356befde80f8e6c8cb327fc62d223a3b4efbcc967be77e87f4d47c7407fc44e
+  database:
+    host: "host.docker.internal"
+    port: 5432
+    sslMode: disable  
+postgresql:
+  enabled: false
+artifactory:
+  enabled: true
+  postgresql:
+    enabled: false
+    waitForDatabase: false    
+  database:
+    type: postgresql
+    driver: org.postgresql.Driver
+    user: "jfrog"
+    password: "jfrog"
+  artifactory:
+    persistence:
+      # could also have been aws-s3-v3
+      type: s3-storage-v3-direct
+      awsS3V3: 
+        testConnection: true
+        # AKA AWS KEY ID
+        identity: "test"
+        # AKA AWS SECRET ACCESS KEY
+        credential: "test"
+        region: eu-west-2
+        bucketName: my-filestore
+        path: artifactory/filestore
+        maxConnections: 50
+        endpoint: "host.docker.internal"
+        # here we want host.docker.internal/my-filestore and not a virtual host my-filestore.host.docker.internal
+        enablePathStyleAccess: true
+        port: 4566
+        useHttp: true
+        useInstanceCredentials: false
+  # Run every Artifactory service to its own container
+  splitServicesToContainers: true
+xray:
+  enabled: false
+# If enabling Xray, rabbitmq should also be enabled
+rabbitmq:
+  enabled: false
+distribution:
+  enabled: false
+insight:
+  enabled: false
+pipelines:
+  enabled: false
+redis:
+  enabled: false
+pdnServer:
+  enabled: false
