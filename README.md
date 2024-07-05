@@ -43,7 +43,7 @@ helm upgrade --install jfrog-platform -f custom-values.yaml -f license-values.ya
 ```
 
 ## Update to a new version 
-Jfrog is not always releasing an updated Helm chart version for every version of artifactory (Or other componenents), but you can update to a given version using the following command:
+Jfrog is not always releasing an updated Helm chart version for every version of artifactory (or other component), but you can update to a given version using the following command:
 
 ```
 helm upgrade jfrog-platform --set global.versions.artifactory=7.84.16 --set databaseUpgradeReady=true --reuse-values --namespace jfrog-platform jfrog/jfrog-platform
