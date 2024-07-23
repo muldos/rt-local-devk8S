@@ -64,9 +64,39 @@ aws s3 rm s3://my-filestore/artifactory/filestore --endpoint-url=http://localhos
 DROP DATABASE artifactory;
 CREATE DATABASE artifactory WITH OWNER=jfrog ENCODING='UTF8';
 GRANT ALL PRIVILEGES ON DATABASE artifactory TO jfrog;
+DROP DATABASE xray;
+CREATE DATABASE xray WITH OWNER=jfrog ENCODING='UTF8';
+GRANT ALL PRIVILEGES ON DATABASE xray TO jfrog;
+
 ```
+
+OR
+
+```
+psql -U postgres -h localhost -f "reset-db.psql"
+```
+
 ### Reinstall Artifactory
 
 ```shell
 helm upgrade --install jfrog-platform -f custom-values.yaml -f license-values.yaml --namespace jfrog-platform --create-namespace jfrog/jfrog-platform
 ```
+
+### Scale horizontally
+```
+helm upgrade jfrog-platform --set artifactory.artifactory.replicaCount=2 --reuse-values --namespace jfrog-platform jfrog/jfrog-platform
+```
+### Going beyond the basics 
+
+#### Custom system.yaml
+Many advanced configurations options rely on customizing Artifactory's `system.yaml` file.
+What can be done is to pass the system.yaml file as a kubernetes secret (in this case it will takes precedence over equivalents settings in the values.yaml file).
+If you need to apply configuration changes, then the best is to update the secret and perform a rolling restart 
+```
+  kubectl rollout restart sts jfrog-platform-artifactory --namespace=jfrog-platform
+```
+
+#### Custom storage classes
+- For artifactory you can use `.artifactory.persistence.storageClassName`
+- For Xray `xray.persistence.storageClass`
+- For rabbitMQ `.rabbitmq.persistence.storageClass`

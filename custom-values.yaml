@@ -12,6 +12,7 @@ global:
   # Generate a random master key with 'openssl rand -hex 32'
   masterKey: 2356befde80f8e6c8cb327fc62d223a3b4efbcc967be77e87f4d47c7407fc44e
   database:
+    initDBCreation: false
     host: "host.docker.internal"
     port: 5432
     sslMode: disable  
@@ -19,6 +20,10 @@ postgresql:
   enabled: false
 artifactory:
   enabled: true
+  jfconnect:
+    enabled: true
+    # proxy and version below 7.77.3 ? 
+    # see : https://jfrog.com/help/r/jfrog-installation-setup-documentation/configure-jfconnect-proxy-for-helm-installation
   postgresql:
     enabled: false
     waitForDatabase: false    
@@ -28,6 +33,7 @@ artifactory:
     user: "jfrog"
     password: "jfrog"
   artifactory:
+    replicaCount: 1
     persistence:
       # could also have been aws-s3-v3
       type: s3-storage-v3-direct
@@ -50,10 +56,28 @@ artifactory:
   # Run every Artifactory service to its own container
   splitServicesToContainers: true
 xray:
-  enabled: false
+  enabled: true
+  #required block for JAS
+  serviceAccount:
+    create: true
+    rbac:
+      create: true  
+  database:
+    url: 'postgres://host.docker.internal:5432/xray?sslmode=disable'
+    user: jfrog
+    password: jfrog
+  xray:  
+    extraSystemYaml:
+      catalog:
+        enabled: true    
+        central:
+          enabled: true
+          url: https://jfrogxraycatalog.jfrog.io/xray
+          username: davidro_catalog_ro
+          password: XA2KXQvFFQCMWbrW  
 # If enabling Xray, rabbitmq should also be enabled
 rabbitmq:
-  enabled: false
+  enabled: true
 distribution:
   enabled: false
 insight:
