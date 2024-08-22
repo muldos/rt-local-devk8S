@@ -50,6 +50,10 @@ helm upgrade jfrog-platform --set global.versions.artifactory=7.84.16 --set data
 ```
 :warning: **Always test any changes in your staging / dev env first !!**
 
+Update the charts : 
+```
+helm repo update
+```
 
 ## Reset everything
 
@@ -96,7 +100,57 @@ If you need to apply configuration changes, then the best is to update the secre
   kubectl rollout restart sts jfrog-platform-artifactory --namespace=jfrog-platform
 ```
 
+To create a secret for Xray system.yaml you can follow these steps
+1. Locate the Xray pod using the following command:
+
+```kubectl get pods -n xray```
+ 
+2. Exec into the xray-server container of the Xray pod:
+ 
+```kubectl exec -it <xray-podname> -c xray-server -n xray -- /bin/sh```
+
+3. Output the system.yaml and copy the content:
+
+```cat /opt/jfrog/xray/var/etc/system.yaml```
+
+4. Create a new file on local machine for the system.yaml with the copied content and add the following parameters to update the open connections to the DB
+```
+server:
+  database:
+    #Default: 60
+    maxOpenConnections: 90
+analysis:
+  database:
+    #Default: 30
+    maxOpenConnections: 60
+indexer:
+  database:
+    #Default: 30
+    maxOpenConnections: 60
+persist:
+  database:
+    #Default: 30
+    maxOpenConnections: 60
+```
+5. Create a kubernetes secret using the system.yaml file created on Xray namespace.
+
+kubectl create secret generic sy --from-file ./xray-cus-sy.yaml -n xray
+
+6. Update the custom values.yaml file for the system YAML override with the secret:
+
+systemYamlOverride:
+  existingSecret: sy
+  dataKey: xray-cus-sy.yaml
+
+7. Run a helm upgrade using the updated custom values.yaml from step 6. 
+ 
+helm upgrade xray jfrog/xray -f cus-values.yaml -n xray
+
+8. Once the kubernetes cluster has successfully deployed, to verify that the configurations have been updated as expected you may follow steps 1-3.
+
 #### Custom storage classes
 - For artifactory you can use `.artifactory.persistence.storageClassName`
 - For Xray `xray.persistence.storageClass`
 - For rabbitMQ `.rabbitmq.persistence.storageClass`
+- The artifactory pvc is mounted at /var/opt/jfrog/artifactory
+- usual sizing is that artifactory PVC size should be 15% of the expected filestore size
