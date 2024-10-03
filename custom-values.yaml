@@ -74,7 +74,7 @@ xray:
           enabled: true
           url: https://jfrogxraycatalog.jfrog.io/xray
           username: davidro_catalog_ro
-          password: XA2KXQvFFQCMWbrW  
+          password: XA2XChangeMErW  
 # If enabling Xray, rabbitmq should also be enabled
 rabbitmq:
   enabled: true
