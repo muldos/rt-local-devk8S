@@ -3,6 +3,8 @@ This sample project host a default values YAML files to configure a self-hosted 
 It is using a bucket provided by localstasck.
 
 ## Pre-requisites
+Install [Localstack](https://docs.localstack.cloud/getting-started/installation/) and the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
+
 Install nginx-ingress controller in your cluster, with snippet annotations enabled :
 
 ```shell
@@ -22,17 +24,14 @@ GRANT ALL PRIVILEGES ON DATABASE artifactory TO jfrog;
 ### Create a local S3 bucket and configure your AWS CLI 
 
 - Start localstack `localstack start -d`
-- Run aws configure to create a new profile
+- Run `aws configure` to create a new profile named 'localstack'
 
-Once ok, create an S3 Bucket named 'my-filestore'
+Once ok, create an S3 Bucket named 'my-filestore', using this profile
 
 ```shell
 aws s3 mb s3://my-filestore --endpoint-url http://localhost:4566 --profile localstack
 ```
 
-```
-kubectl port-forward --namespace=jfrog-platform service/jfrog-platform-artifactory 8082:8082
-```
 Check its content.
 
 ```shell
@@ -102,6 +101,13 @@ helm upgrade --install jfrog-platform -f custom-values.yaml -f license-values.ya
 helm upgrade jfrog-platform --set artifactory.artifactory.replicaCount=2 --reuse-values --namespace jfrog-platform jfrog/jfrog-platform
 ```
 ### Going beyond the basics 
+
+### Bypassing ingress entry point 
+
+Connect directly to artifactory svc on port 8082 using port forward
+```
+kubectl port-forward --namespace=jfrog-platform service/jfrog-platform-artifactory 8082:8082
+```
 
 #### Custom system.yaml
 Many advanced configurations options rely on customizing Artifactory's `system.yaml` file.
