@@ -20,6 +20,28 @@ postgresql:
   enabled: false
 artifactory:
   enabled: true
+  nginx:
+    enabled: false
+  ingress:
+    enabled: true
+    defaultBackend:
+      enabled: true
+    hosts: 
+      - jfrog.localdev.me
+    routerPath: /
+    artifactoryPath: /artifactory/
+    className: ""
+    annotations: 
+      kubernetes.io/ingress.class: "nginx"
+      nginx.ingress.kubernetes.io/proxy-body-size: "0"
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+      nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+      nginx.ingress.kubernetes.io/rewrite-target: "/"
+      nginx.ingress.kubernetes.io/configuration-snippet: |
+        rewrite ^/(v2)/token /artifactory/api/docker/null/v2/token;
+        rewrite ^/(v2)/([^\/]*)/(.*) /artifactory/api/docker/$2/$1/$3;  
+  mc:
+    enabled: true
   jfconnect:
     enabled: true
     # proxy and version below 7.77.3 ? 
@@ -56,7 +78,7 @@ artifactory:
   # Run every Artifactory service to its own container
   splitServicesToContainers: true
 xray:
-  enabled: true
+  enabled: false
   #required block for JAS
   serviceAccount:
     create: true
@@ -74,10 +96,10 @@ xray:
           enabled: true
           url: https://jfrogxraycatalog.jfrog.io/xray
           username: davidro_catalog_ro
-          password: XA2KXQvFFQCMWbrW  
+          password: changeme  
 # If enabling Xray, rabbitmq should also be enabled
 rabbitmq:
-  enabled: true
+  enabled: false
 distribution:
   enabled: false
 insight:

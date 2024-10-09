@@ -3,6 +3,14 @@ This sample project host a default values YAML files to configure a self-hosted 
 It is using a bucket provided by localstasck.
 
 ## Pre-requisites
+Install nginx-ingress controller in your cluster, with snippet annotations enabled :
+
+```shell
+helm upgrade --install ingress-nginx ingress-nginx \
+  --repo https://kubernetes.github.io/ingress-nginx \
+  --set controller.allowSnippetAnnotations=true \
+  --namespace ingress-nginx --create-namespace 
+```
 
 ### Create the db and user
 
@@ -22,6 +30,9 @@ Once ok, create an S3 Bucket named 'my-filestore'
 aws s3 mb s3://my-filestore --endpoint-url http://localhost:4566 --profile localstack
 ```
 
+```
+kubectl port-forward --namespace=jfrog-platform service/jfrog-platform-artifactory 8082:8082
+```
 Check its content.
 
 ```shell
@@ -154,3 +165,9 @@ helm upgrade xray jfrog/xray -f cus-values.yaml -n xray
 - For rabbitMQ `.rabbitmq.persistence.storageClass`
 - The artifactory pvc is mounted at /var/opt/jfrog/artifactory
 - usual sizing is that artifactory PVC size should be 15% of the expected filestore size
+
+
+
+
+
+
