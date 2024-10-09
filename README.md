@@ -1,6 +1,7 @@
 # Artifactory local K8S installation for testing purpose
 This sample project host a default values YAML files to configure a self-hosted artifactory instance with an external database and an external s3 bucket.
 It is using a bucket provided by localstasck.
+This has been tested using the kubernetes cluster provided by rancher desktop (v1.21+)
 
 ## Pre-requisites
 Install [Localstack](https://docs.localstack.cloud/getting-started/installation/) and the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
