@@ -55,30 +55,30 @@ artifactory:
     user: "jfrog"
     password: "jfrog"
   artifactory:
-    replicaCount: 1
+    replicaCount: 1 
     persistence:
       # could also have been aws-s3-v3
       type: s3-storage-v3-direct
       awsS3V3: 
         testConnection: true
         # AKA AWS KEY ID
-        identity: "test"
+        identity: "minioadmin"
         # AKA AWS SECRET ACCESS KEY
-        credential: "test"
-        region: eu-west-2
-        bucketName: my-filestore
+        credential: "minioadmin"
+        region: us-east-1
+        bucketName: rt-filestore
         path: artifactory/filestore
         maxConnections: 50
         endpoint: "host.docker.internal"
-        # here we want host.docker.internal/my-filestore and not a virtual host my-filestore.host.docker.internal
+        # here we want host.docker.internal/rt-filestore and not a virtual host rt-filestore.host.docker.internal
         enablePathStyleAccess: true
-        port: 4566
+        port: 9090
         useHttp: true
         useInstanceCredentials: false
   # Run every Artifactory service to its own container
   splitServicesToContainers: true
 xray:
-  enabled: false
+  enabled: true
   #required block for JAS
   serviceAccount:
     create: true
@@ -95,18 +95,16 @@ xray:
         central:
           enabled: true
           url: https://jfrogxraycatalog.jfrog.io/xray
-          username: davidro_catalog_ro
+          username: changeme
           password: changeme  
 # If enabling Xray, rabbitmq should also be enabled
 rabbitmq:
-  enabled: false
+  enabled: true
 distribution:
   enabled: false
-insight:
-  enabled: false
-pipelines:
-  enabled: false
-redis:
-  enabled: false
-pdnServer:
-  enabled: false
+  database:
+    url: 'jdbc:postgresql://host.docker.internal:5432/distribution?sslmode=disable'
+    user: jfrog
+    password: jfrog
+worker:
+  enabled: true

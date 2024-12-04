@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<config version="2">
+    <chain>
+        <provider type="cache-fs" id="cache-fs">
+            <provider type="s3-storage-v3" id="s3-storage-v3"/>
+        </provider>
+    </chain>
+    <provider type="cache-fs" id="cache-fs">
+        <maxCacheSize>5000000000</maxCacheSize>
+        <cacheProviderDir>cache</cacheProviderDir>
+    </provider>
+    <provider type="s3-storage-v3" id="s3-storage-v3">
+        <bucketName>my-filestore</bucketName>
+        <enablePathStyleAccess>true</enablePathStyleAccess>
+        <testConnection>true</testConnection>
+        <useHttp>true</useHttp>
+        <signatureExpirySeconds>300</signatureExpirySeconds>
+        <signedUrlExpirySeconds>30</signedUrlExpirySeconds>
+        <usePresigning>false</usePresigning>
+        <useInstanceCredentials>false</useInstanceCredentials>
+        <path>artifactory/filestore</path>
+        <endpoint>host.docker.internal</endpoint>
+        <credential>410cb8.aesgcm256.rQHifgmhEiYorf4hPLG249OGCwWiOh8Zv0Cm5oVCP5A</credential>
+        <port>4566</port>
+        <identity>410cb8.aesgcm256.K68pzeiu7zDqR67qZG0nu2BNgk6Sr4bbc9ANviNlzeU</identity>
+        <region>eu-west-2</region>
+        <maxConnections>50</maxConnections>
+    </provider>
+</config>

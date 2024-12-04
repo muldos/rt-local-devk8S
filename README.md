@@ -1,12 +1,16 @@
-# Artifactory local K8S installation for testing purpose
+# Artifactory local K3S installation for testing purpose
 This sample project host a default values YAML files to configure a self-hosted artifactory instance with an external database and an external s3 bucket.
-It is using a bucket provided by localstasck.
+It is using a bucket provided by minio.
 This has been tested using the kubernetes cluster provided by rancher desktop (v1.21+)
 
 ## Pre-requisites
-Install [Localstack](https://docs.localstack.cloud/getting-started/installation/) and the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
+Install [Minio](https://min.io/) as we will use it as S3 compatible filestore solution.
+By default minio will runs on port 9000, but you can specify another one if you have a conflict, as in hte above command where we use port 9090
 
-Install nginx-ingress controller in your cluster, with snippet annotations enabled :
+```
+minio server --address :9090 /Users/johndoe/dev/minio-data
+```
+To access properly artifactory from outside Rancher K3S, install nginx-ingress controller in your cluster, with snippet annotations enabled :
 
 ```shell
 helm upgrade --install ingress-nginx ingress-nginx \
@@ -20,37 +24,26 @@ helm upgrade --install ingress-nginx ingress-nginx \
 ```SQL
 CREATE USER jfrog WITH PASSWORD 'jfrog';
 CREATE DATABASE artifactory WITH OWNER=jfrog ENCODING='UTF8';
+CREATE DATABASE xray WITH OWNER=jfrog ENCODING='UTF8';
 GRANT ALL PRIVILEGES ON DATABASE artifactory TO jfrog;
+GRANT ALL PRIVILEGES ON DATABASE xray TO jfrog;
 ```
-### Create a local S3 bucket and configure your AWS CLI 
+### Create a local S3 bucket using Min.io
 
-- Start localstack `localstack start -d`
-- Run `aws configure` to create a new profile named 'localstack'
+- Start minio
+- Using the webui, create a bucket named `rt-filestore`
 
-Once ok, create an S3 Bucket named 'my-filestore', using this profile
-
-```shell
-aws s3 mb s3://my-filestore --endpoint-url http://localhost:4566 --profile localstack
-```
-
-Check its content.
-
-```shell
-aws s3 ls --endpoint-url=http://localhost:4566 --recursive --human-readable --profile localstack
-```
-
- :information_source: Note that this command could be used later on to validate that your setup is fine, once you've uploaded a file.
 
 ## Jfrog platform helm chart installation
 
-### Firt time install
-Update your license using the `yaml.tpl` provided, and rename it only to `.yaml`.
+### First time install
+Add licenses separated by newlines in a file named `art.lic`
 
 Also update values in the `custom-values.yaml`.
 
 Then run
 ```shell
-helm upgrade --install jfrog-platform -f custom-values.yaml -f license-values.yaml --namespace jfrog-platform --create-namespace jfrog/jfrog-platform
+helm upgrade --install jfrog-platform -f custom-values.yaml -f license-values-secret.yaml --namespace jfrog-platform --create-namespace jfrog/jfrog-platform
 ```
 
 ## Update to a new version 
@@ -172,9 +165,3 @@ helm upgrade xray jfrog/xray -f cus-values.yaml -n xray
 - For rabbitMQ `.rabbitmq.persistence.storageClass`
 - The artifactory pvc is mounted at /var/opt/jfrog/artifactory
 - usual sizing is that artifactory PVC size should be 15% of the expected filestore size
-
-
-
-
-
-
