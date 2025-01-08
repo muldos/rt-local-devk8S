@@ -37,20 +37,29 @@ GRANT ALL PRIVILEGES ON DATABASE xray TO jfrog;
 ## Jfrog platform helm chart installation
 
 ### First time install
-Add licenses separated by newlines in a file named `art.lic`
+- Add licenses separated by newlines in a file named `art.lic`
+- create a namespace `jfrog-platform`
+- create a kubernetes secret in this namespace containing the licenses 
+```
+kubectl create namespace jfrog-platform 
+kubectl create secret generic -n jfrog-platform artifactory-license --from-file=./art.lic
 
-Also update values in the `custom-values.yaml`.
+```
+
+(ref : https://jfrog.com/help/r/jfrog-installation-setup-documentation/add-licenses-using-secrets)
+
+Also update values in the `custom-values.yaml` (with bucket endpoint port / catalog credentials)
 
 Then run
 ```shell
-helm upgrade --install jfrog-platform -f custom-values.yaml -f license-values-secret.yaml --namespace jfrog-platform --create-namespace jfrog/jfrog-platform
+helm upgrade --install jfrog-platform -f custom-values.yaml -f license-values-secret.yaml --namespace jfrog-platform jfrog/jfrog-platform
 ```
 
 ## Update to a new version 
 Jfrog is not always releasing an updated Helm chart version for every version of artifactory (or other component), but you can update to a given version using the following command:
 
 ```
-helm upgrade jfrog-platform --set global.versions.artifactory=7.84.16 --set databaseUpgradeReady=true --reuse-values --namespace jfrog-platform jfrog/jfrog-platform
+helm upgrade jfrog-platform -f custom-values-with-creds.yaml --set global.versions.artifactory=7.84.16 --set databaseUpgradeReady=true --namespace jfrog-platform jfrog/jfrog-platform
 ```
 :warning: **Always test any changes in your staging / dev env first !!**
 
