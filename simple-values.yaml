@@ -1,0 +1,39 @@
+artifactory:
+  enabled: true
+  nginx:
+    enabled: false
+  ingress:
+    enabled: true
+    defaultBackend:
+      enabled: true
+    hosts: 
+      - jfrog.localdev.me
+    routerPath: /
+    artifactoryPath: /artifactory/
+    className: "nginx"
+    annotations: 
+      nginx.ingress.kubernetes.io/proxy-body-size: "0"
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "2400s"
+      nginx.ingress.kubernetes.io/proxy-send-timeout: "2400s"
+  mc:
+    enabled: true
+  jfconnect:
+    enabled: true
+  artifactory:
+    replicaCount: 1
+xray:
+  enabled: true
+  #required block for JAS
+  serviceAccount:
+    create: true
+  rbac:
+    create: true
+rabbitmq:
+  enabled: true
+catalog:
+  enabled: true  
+##postgresql:
+#  image:
+#    tag: 15.6.0-debian-11-r16
+databaseUpgradeReady: true
+
